@@ -1,5 +1,5 @@
-import { Injectable } from "@nestjs/common";
-import {Note} from "@prisma/client"
+import { ForbiddenException, Injectable } from "@nestjs/common";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { PrismaService } from "src/prisma/prisma.service";
 
 @Injectable()
@@ -7,8 +7,19 @@ export class NotesService {
 
     constructor(private readonly _prismaService: PrismaService){}
 
-    async getNotes(): Promise<Note[]>  {
+    async getNotes() {
         return await this._prismaService.note.findMany();
+    }
+
+    async getNoteById(id: number){
+        try {
+            return await this._prismaService.note.findUniqueOrThrow({where: {id}})
+        }catch(e){
+            if (e instanceof PrismaClientKnownRequestError)
+                if (e.code == "P2025")
+                    throw new ForbiddenException(`there is no notes with id ${id} !`)
+            throw e
+        }
     }
 
     async addNote(content: string ,title?: string ){

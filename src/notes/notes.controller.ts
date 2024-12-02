@@ -16,13 +16,18 @@ export class NotesController{
         return await this._notesProvider.getNotes();
     }
 
+    @Get("/:id")
+    async findById(@Param("id") id: string){
+        return await this._notesProvider.getNoteById(Number(id));
+    }
+
     @Post("/add")
     async add(@Body() body: NotesDto){
         return await this._notesProvider.addNote(body.content, body.title)
         
     }
 
-    @Delete("/delete/:id")
+    @Delete("/:id/delete")
     async delete(@Param("id") id:string){
         try {
             return  await this._notesProvider.removeNote(Number(id))
@@ -37,12 +42,12 @@ export class NotesController{
     }
    
 
-    @Patch("/update_title/:id")
+    @Patch("/:id/update_title/")
     async updateTitle(@Param("id") id: string, @Body("title") newTitle?:string  ){
         return await this._notesProvider.updateNoteTitle(Number(id), newTitle )
     }
 
-    @Patch("/update/:id")
+    @Patch("/:id/update")
     async update(@Param("id") id: string, @Body("content") newContent:string  ){
         if (!newContent){
             throw new ForbiddenException("content is required !")
